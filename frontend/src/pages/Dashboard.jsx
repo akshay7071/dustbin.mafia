@@ -4,10 +4,6 @@ import { fetchAllBins, fetchPredictions } from '../store/binsSlice';
 import BinMap from '../components/BinMap';
 import RoutePanel from '../components/RoutePanel';
 import StatsBar from '../components/StatsBar';
-import { socket } from '../socket';
-import { updateBinStatus, setPredictionFromSocket } from '../store/binsSlice';
-import { setRouteFromSocket } from '../store/routeSlice';
-
 export default function Dashboard() {
   const dispatch = useDispatch();
   const { predictions } = useSelector(state => state.bins);
@@ -16,19 +12,14 @@ export default function Dashboard() {
   useEffect(() => {
     // Initial fetch
     dispatch(fetchAllBins());
-    // Auto-run prediction on load for demo
     dispatch(fetchPredictions());
 
-    // Socket subscriptions
-    socket.on('bin_status_change', (data) => dispatch(updateBinStatus(data)));
-    socket.on('prediction_ready', (data) => dispatch(setPredictionFromSocket(data)));
-    socket.on('route_ready', (data) => dispatch(setRouteFromSocket(data)));
+    // Polling every 30 seconds
+    const interval = setInterval(() => {
+      dispatch(fetchAllBins());
+    }, 30000);
 
-    return () => {
-      socket.off('bin_status_change');
-      socket.off('prediction_ready');
-      socket.off('route_ready');
-    };
+    return () => clearInterval(interval);
   }, [dispatch]);
 
   return (

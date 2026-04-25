@@ -2,12 +2,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../api/axios';
 
 export const optimizeRoute = createAsyncThunk('route/optimize', async ({ depot_lat, depot_lng, urgency_filter }) => {
-  const { data } = await api.post('/api/route', { depot_lat, depot_lng, urgency_filter });
+  const { data } = await api.post('/route', { depot_lat, depot_lng, urgency_filter });
   return data;
 });
 
 export const dispatchRoute = createAsyncThunk('route/dispatch', async ({ driver_phone, route_id }) => {
-  const { data } = await api.post('/api/dispatch', { driver_phone, route_id });
+  const { data } = await api.post('/dispatch', { driver_phone, route_id });
   return data;
 });
 
@@ -22,10 +22,6 @@ const routeSlice = createSlice({
     error: null,
   },
   reducers: {
-    setRouteFromSocket: (state, action) => {
-      state.route = action.payload.route;
-      state.stats = action.payload.stats;
-    },
     clearRoute: (state) => {
       state.route = [];
       state.stats = {};
@@ -67,6 +63,6 @@ const routeSlice = createSlice({
   }
 });
 
-export const { setRouteFromSocket, clearRoute } = routeSlice.actions;
+export const { clearRoute } = routeSlice.actions;
 
 export default routeSlice.reducer;

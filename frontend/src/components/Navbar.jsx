@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, LogOut, LayoutDashboard, BarChart3, Globe } from 'lucide-react';
+import { Trash2, LogOut, LayoutDashboard, BarChart3, Globe, User, Zap, History } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -22,6 +22,9 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-1">
             <NavLink to="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" current={location.pathname} />
             <NavLink to="/analytics" icon={<BarChart3 className="w-4 h-4" />} label="Analytics" current={location.pathname} />
+            <NavLink to="/admin/retrain" icon={<Zap className="w-4 h-4" />} label="Evolution" current={location.pathname} />
+            <NavLink to="/admin/logs" icon={<History className="w-4 h-4" />} label="Logs" current={location.pathname} />
+            <NavLink to="/collector" icon={<User className="w-4 h-4" />} label="Collector" current={location.pathname} />
             <NavLink to="/public" icon={<Globe className="w-4 h-4" />} label="Public View" current={location.pathname} />
           </div>
         )}

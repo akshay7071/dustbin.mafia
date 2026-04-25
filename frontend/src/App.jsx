@@ -11,6 +11,9 @@ import Dashboard from './pages/Dashboard';
 import Driver from './pages/Driver';
 import Public from './pages/Public';
 import Analytics from './pages/Analytics';
+import CollectorPortal from './pages/CollectorPortal';
+import AdminLogs from './pages/AdminLogs';
+import AdminRetrain from './pages/AdminRetrain';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 
@@ -21,7 +24,8 @@ function AppContent() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/public" element={<Public />} />
-        <Route path="/driver" element={<Driver />} />
+        <Route path="/driver" element={<Navigate to="/collector" replace />} />
+        <Route path="/collector" element={<CollectorPortal />} />
         
         {/* Protected Routes */}
         <Route 
@@ -41,6 +45,24 @@ function AppContent() {
             <ProtectedRoute>
               <Navbar />
               <Analytics />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/logs" 
+          element={
+            <ProtectedRoute>
+              <Navbar />
+              <AdminLogs />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/retrain" 
+          element={
+            <ProtectedRoute>
+              <Navbar />
+              <AdminRetrain />
             </ProtectedRoute>
           } 
         />

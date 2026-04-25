@@ -2,13 +2,13 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../api/axios';
 
 export const fetchAllBins = createAsyncThunk('bins/fetchAll', async () => {
-  const { data } = await api.get('/api/bins');
-  return data.bins;
+  const { data } = await api.get('/bins');
+  return data.bins || [];
 });
 
 export const fetchPredictions = createAsyncThunk('bins/predict', async () => {
-  const { data } = await api.post('/api/predict');
-  return data.predictions;
+  const { data } = await api.post('/predict');
+  return data.predictions || [];
 });
 
 const binsSlice = createSlice({
@@ -21,17 +21,9 @@ const binsSlice = createSlice({
     error: null,
   },
   reducers: {
-    updateBinStatus: (state, { payload }) => {
-      const { bin_id, status } = payload;
-      const bin = state.predictions.find(b => b.bin_id === bin_id);
-      if (bin && status === 'collected') {
-        bin.urgency = 'LOW';
-        bin.predicted_fill = 0;
-      }
-    },
-    setPredictionFromSocket: (state, action) => {
-      state.predictions = action.payload.predictions || action.payload;
-      state.lastPredicted = new Date().toISOString();
+    clearBins: (state) => {
+      state.bins = [];
+      state.predictions = [];
     }
   },
   extraReducers: (builder) => {
@@ -58,10 +50,10 @@ const binsSlice = createSlice({
   }
 });
 
-export const { updateBinStatus, setPredictionFromSocket } = binsSlice.actions;
+export const { clearBins } = binsSlice.actions;
 
-export const selectCriticalCount = (state) => state.bins.predictions.filter(b => b.urgency === "CRITICAL").length;
-export const selectHighCount = (state) => state.bins.predictions.filter(b => b.urgency === "HIGH").length;
-export const selectAllPredictions = (state) => state.bins.predictions;
+export const selectCriticalCount = (state) => (state.bins.predictions || []).filter(b => b.urgency === "CRITICAL").length;
+export const selectHighCount = (state) => (state.bins.predictions || []).filter(b => b.urgency === "HIGH").length;
+export const selectAllPredictions = (state) => state.bins.predictions || [];
 
 export default binsSlice.reducer;
