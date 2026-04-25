@@ -1,0 +1,72 @@
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../api/axios';
+
+export const optimizeRoute = createAsyncThunk('route/optimize', async ({ depot_lat, depot_lng, urgency_filter }) => {
+  const { data } = await api.post('/api/route', { depot_lat, depot_lng, urgency_filter });
+  return data;
+});
+
+export const dispatchRoute = createAsyncThunk('route/dispatch', async ({ driver_phone, route_id }) => {
+  const { data } = await api.post('/api/dispatch', { driver_phone, route_id });
+  return data;
+});
+
+const routeSlice = createSlice({
+  name: 'route',
+  initialState: {
+    route: [],
+    stats: {},
+    routeId: null,
+    dispatched: false,
+    loading: false,
+    error: null,
+  },
+  reducers: {
+    setRouteFromSocket: (state, action) => {
+      state.route = action.payload.route;
+      state.stats = action.payload.stats;
+    },
+    clearRoute: (state) => {
+      state.route = [];
+      state.stats = {};
+      state.routeId = null;
+      state.dispatched = false;
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(optimizeRoute.pending, (state) => { state.loading = true; })
+      .addCase(optimizeRoute.fulfilled, (state, action) => {
+        state.loading = false;
+        state.route = action.payload.route;
+        state.stats = {
+          total_km: action.payload.total_km,
+          baseline_km: action.payload.baseline_km,
+          fuel_saved_L: action.payload.fuel_saved_L,
+          co2_saved_kg: action.payload.co2_saved_kg,
+          bins_in_route: action.payload.bins_in_route,
+          bins_skipped: action.payload.bins_skipped,
+        };
+        state.routeId = action.payload.routeId || null;
+        state.dispatched = false;
+      })
+      .addCase(optimizeRoute.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      .addCase(dispatchRoute.pending, (state) => { state.loading = true; })
+      .addCase(dispatchRoute.fulfilled, (state) => {
+        state.loading = false;
+        state.dispatched = true;
+      })
+      .addCase(dispatchRoute.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
+  }
+});
+
+export const { setRouteFromSocket, clearRoute } = routeSlice.actions;
+
+export default routeSlice.reducer;
