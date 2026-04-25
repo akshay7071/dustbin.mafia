@@ -1,0 +1,30 @@
+[
+  {
+    "timestamp": "2026-04-25T17:11:03.945923",
+    "samples_used": 5,
+    "old_rmse": 25.2218,
+    "new_rmse": 7.0625,
+    "improved": true
+  },
+  {
+    "timestamp": "2026-04-25T17:17:41.490729",
+    "samples_used": 5,
+    "old_rmse": 7.0625,
+    "new_rmse": 7.0625,
+    "improved": false
+  },
+  {
+    "timestamp": "2026-04-25T17:31:07.770898",
+    "samples_used": 6,
+    "old_rmse": 13.4665,
+    "new_rmse": 9.4056,
+    "improved": true
+  },
+  {
+    "timestamp": "2026-04-25T17:57:06.826944",
+    "samples_used": 30,
+    "old_rmse": 17.7649,
+    "new_rmse": 5.8093,
+    "improved": true
+  }
+]

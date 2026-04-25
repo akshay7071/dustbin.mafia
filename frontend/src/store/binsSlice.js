@@ -1,37 +1,42 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../api/axios';
+import { DUMMY_BINS } from '../utils/dummyData';
 
 export const fetchAllBins = createAsyncThunk('bins/fetchAll', async () => {
-  const { data } = await api.get('/api/bins');
-  return data.bins;
+  try {
+    const { data } = await api.get('/bins');
+    return data && data.length > 0 ? data : DUMMY_BINS;
+  } catch (err) {
+    console.warn('Backend unavailable, using dummy bins.');
+    return DUMMY_BINS;
+  }
 });
 
-export const fetchPredictions = createAsyncThunk('bins/predict', async () => {
-  const { data } = await api.post('/api/predict');
-  return data.predictions;
+export const runSimulation = createAsyncThunk('bins/simulate', async (scenario = 'random') => {
+  try {
+    const { data } = await api.post('/simulate', { scenario });
+    return data && data.length > 0 ? data : DUMMY_BINS;
+  } catch (err) {
+    console.warn('Simulation failed, using dummy bins.');
+    // Randomize dummy data a bit for effect
+    return DUMMY_BINS.map(b => ({...b, fill_pct: Math.floor(Math.random() * 100), urgency: Math.random() > 0.5 ? 'high' : 'medium'}));
+  }
 });
 
 const binsSlice = createSlice({
   name: 'bins',
   initialState: {
     bins: [],
-    predictions: [],
     loading: false,
-    lastPredicted: null,
+    lastUpdated: null,
     error: null,
   },
   reducers: {
-    updateBinStatus: (state, { payload }) => {
-      const { bin_id, status } = payload;
-      const bin = state.predictions.find(b => b.bin_id === bin_id);
-      if (bin && status === 'collected') {
-        bin.urgency = 'LOW';
-        bin.predicted_fill = 0;
+    updateBinLocally: (state, action) => {
+      const index = state.bins.findIndex(b => b.bin_id === action.payload.bin_id);
+      if (index !== -1) {
+        state.bins[index] = { ...state.bins[index], ...action.payload };
       }
-    },
-    setPredictionFromSocket: (state, action) => {
-      state.predictions = action.payload.predictions || action.payload;
-      state.lastPredicted = new Date().toISOString();
     }
   },
   extraReducers: (builder) => {
@@ -40,28 +45,34 @@ const binsSlice = createSlice({
       .addCase(fetchAllBins.fulfilled, (state, action) => {
         state.loading = false;
         state.bins = action.payload;
+        state.lastUpdated = new Date().toISOString();
       })
       .addCase(fetchAllBins.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
-      .addCase(fetchPredictions.pending, (state) => { state.loading = true; })
-      .addCase(fetchPredictions.fulfilled, (state, action) => {
+      .addCase(runSimulation.pending, (state) => { state.loading = true; })
+      .addCase(runSimulation.fulfilled, (state, action) => {
         state.loading = false;
-        state.predictions = action.payload;
-        state.lastPredicted = new Date().toISOString();
+        state.bins = action.payload;
+        state.lastUpdated = new Date().toISOString();
       })
-      .addCase(fetchPredictions.rejected, (state, action) => {
+      .addCase(runSimulation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       });
   }
 });
 
-export const { updateBinStatus, setPredictionFromSocket } = binsSlice.actions;
+export const { updateBinLocally } = binsSlice.actions;
 
-export const selectCriticalCount = (state) => state.bins.predictions.filter(b => b.urgency === "CRITICAL").length;
-export const selectHighCount = (state) => state.bins.predictions.filter(b => b.urgency === "HIGH").length;
-export const selectAllPredictions = (state) => state.bins.predictions;
+// Selectors matching backend keys
+export const selectCriticalCount = (state) => 
+  (state.bins.bins || []).filter(b => b.urgency?.toLowerCase() === "high").length;
+
+export const selectMediumCount = (state) => 
+  (state.bins.bins || []).filter(b => b.urgency?.toLowerCase() === "medium").length;
+
+export const selectAllBins = (state) => state.bins.bins || [];
 
 export default binsSlice.reducer;

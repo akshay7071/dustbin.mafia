@@ -1,91 +1,156 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useState, useCallback, useMemo } from 'react';
+import { GoogleMap, useJsApiLoader, MarkerF, PolylineF, InfoWindowF } from '@react-google-maps/api';
 
-const URGENCY_COLOR = {
-  CRITICAL: "#EF4444", // Neon Red
-  HIGH:     "#F59E0B", // Amber
-  MEDIUM:   "#F59E0B", // Amber
-  LOW:      "#10B981"  // Emerald
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%'
 };
 
-const GLOW_STYLE = {
-  CRITICAL: { color: '#EF4444', fillColor: '#EF4444', fillOpacity: 0.9, weight: 2 },
-  HIGH: { color: '#F59E0B', fillColor: '#F59E0B', fillOpacity: 0.8, weight: 2 },
-  MEDIUM: { color: '#F59E0B', fillColor: '#F59E0B', fillOpacity: 0.6, weight: 1 },
-  LOW: { color: '#10B981', fillColor: '#10B981', fillOpacity: 0.5, weight: 1 }
+const defaultCenter = {
+  lat: 19.876,
+  lng: 75.342
 };
 
-// Component to handle heatmap overlay (simulated with canvas/plasma class)
-function HeatmapOverlay() {
-  const map = useMap();
-  useEffect(() => {
-    map.getPane('overlayPane').classList.add('animate-plasma');
-    return () => {
-      map.getPane('overlayPane').classList.remove('animate-plasma');
-    };
-  }, [map]);
-  return null;
-}
+const LIBRARIES = ['geometry'];
 
-export default function LiveMap({ predictions = [], route = [], showHeatmap = false }) {
-  const routeCoords = route.map(stop => [stop.lat, stop.lng]);
+export default function LiveMap({ predictions = [], route = [], liveTruckLocation = null }) {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCTLQiaw9lqFHSTVhPBQLVO9jtfQwUSvEQ',
+    libraries: LIBRARIES
+  });
+
+  const [map, setMap] = useState(null);
+  const [selectedBin, setSelectedBin] = useState(null);
+
+  const center = useMemo(() => {
+    if (liveTruckLocation) {
+      return liveTruckLocation;
+    }
+    if (predictions.length > 0) {
+      const first = predictions[0];
+      if (first.lat && (first.lon || first.lng)) {
+        return { lat: first.lat, lng: first.lon || first.lng };
+      }
+    }
+    return defaultCenter;
+  }, [predictions, liveTruckLocation]);
+
+  const routeCoords = useMemo(() => {
+    return route.map(stop => ({
+      lat: stop.lat,
+      lng: stop.lon || stop.lng
+    }));
+  }, [route]);
+
+  const onLoad = useCallback(function callback(map) {
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(function callback(map) {
+    setMap(null);
+  }, []);
+
+  if (!isLoaded) return <div className="w-full h-full bg-slate-900 flex items-center justify-center text-slate-400">Loading Satellite Map...</div>;
 
   return (
-    <div className="relative flex-1 h-full w-full">
-      <MapContainer 
-        center={[19.8744, 75.3445]} 
-        zoom={13} 
-        style={{ height: '100%', width: '100%', zIndex: 0, backgroundColor: '#050914' }}
-        zoomControl={false}
+    <div className="w-full h-full relative">
+      <GoogleMap
+        mapContainerStyle={mapContainerStyle}
+        center={center}
+        zoom={14}
+        onLoad={onLoad}
+        onUnmount={onUnmount}
+        options={{
+          mapTypeId: 'satellite',
+          disableDefaultUI: true,
+          zoomControl: true,
+        }}
       >
-        <TileLayer 
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        />
-        
-        {showHeatmap && <HeatmapOverlay />}
-
-        {predictions.map(bin => {
-          const isCritical = bin.urgency === "CRITICAL";
-          return (
-            <CircleMarker
-              key={bin.bin_id}
-              center={[bin.lat, bin.lng]}
-              radius={isCritical ? 12 : bin.urgency === "HIGH" ? 9 : 6}
-              pathOptions={{
-                ...GLOW_STYLE[bin.urgency],
-                className: isCritical ? 'animate-pulse-red' : ''
-              }}
-            >
-              <Popup className="custom-popup border-0 bg-transparent">
-                <div className="glass-panel p-4 rounded-xl border border-white/10 text-white min-w-[220px] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
-                  <strong className="block font-heading text-lg text-cyan-400 mb-3">{bin.area}</strong>
-                  <div className="text-xs font-mono grid grid-cols-2 gap-x-4 gap-y-3">
-                    <span className="text-slate-400">BIN_ID:</span> <span className="text-white">{bin.bin_id}</span>
-                    <span className="text-slate-400">FILL:</span> <span className="text-white font-bold">{bin.predicted_fill}%</span>
-                    <span className="text-slate-400">URGENCY:</span> <span className="font-bold" style={{color: URGENCY_COLOR[bin.urgency]}}>{bin.urgency}</span>
-                    <span className="text-slate-400">STATUS:</span> <span className="text-emerald-400 capitalize">{bin.status || 'Active'}</span>
-                  </div>
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
-        
-        {routeCoords.length > 0 && (
-          <Polyline 
-            positions={routeCoords} 
-            pathOptions={{ 
-              color: "#06B6D4", // Neon Cyan
-              weight: 4, 
-              opacity: 0.9,
-              dashArray: "10 10",
-              className: 'route-polyline'
-            }} 
+        {/* Route Line */}
+        {routeCoords.length > 1 && (
+          <PolylineF
+            path={routeCoords}
+            options={{
+              strokeColor: '#6366f1',
+              strokeOpacity: 1.0,
+              strokeWeight: 4,
+            }}
           />
         )}
-      </MapContainer>
+
+        {/* Live Truck Marker */}
+        {liveTruckLocation && (
+          <MarkerF
+            position={liveTruckLocation}
+            icon={{
+              url: 'https://cdn-icons-png.flaticon.com/512/2830/2830310.png', // Trash truck icon
+              scaledSize: new window.google.maps.Size(40, 40),
+              anchor: new window.google.maps.Point(20, 20)
+            }}
+            zIndex={100}
+          />
+        )}
+
+        {/* Bin Markers */}
+        {predictions.map((bin, idx) => {
+          const urgencyKey = (bin.urgency || 'low').toUpperCase();
+          const isHigh = urgencyKey === "HIGH" || urgencyKey === "CRITICAL";
+          const isMedium = urgencyKey === "MEDIUM";
+          
+          let iconColor = isHigh ? 'red' : isMedium ? 'yellow' : 'green';
+          let url = `http://maps.google.com/mapfiles/ms/icons/${iconColor}-dot.png`;
+
+          return (
+            <MarkerF
+              key={bin.bin_id || idx}
+              position={{ lat: bin.lat, lng: bin.lon || bin.lng }}
+              icon={{
+                url: url,
+                scaledSize: new window.google.maps.Size(32, 32)
+              }}
+              onClick={() => setSelectedBin(bin)}
+            />
+          );
+        })}
+
+        {/* Info Window */}
+        {selectedBin && (
+          <InfoWindowF
+            position={{ lat: selectedBin.lat, lng: selectedBin.lon || selectedBin.lng }}
+            onCloseClick={() => setSelectedBin(null)}
+          >
+            <div className="p-1 min-w-[150px] text-slate-800">
+              <strong className="block text-indigo-600 text-sm mb-1 font-bold">
+                {selectedBin.name || selectedBin.area_name || 'Bin Location'}
+              </strong>
+              <div className="text-xs space-y-1">
+                <div>ID: {selectedBin.bin_id?.slice(-8) || 'N/A'}</div>
+                <div>Fill: {Math.round(selectedBin.fill_pct || 0)}%</div>
+              </div>
+            </div>
+          </InfoWindowF>
+        )}
+      </GoogleMap>
+
+      {/* Map Legend Overlay */}
+      <div className="absolute top-6 left-6 z-10 pointer-events-none">
+        <div className="p-4 rounded-xl border border-black/10 bg-white/90 shadow-lg flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-red-500" />
+            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Urgent (&gt;80%)</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Normal (&lt;50%)</span>
+          </div>
+          <div className="h-px bg-slate-200 my-1" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-1 bg-indigo-500" />
+            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Optimized Path</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

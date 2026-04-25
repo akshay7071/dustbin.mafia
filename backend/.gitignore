@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+*.pkl
+.vscode/
+.idea/
+__init__.py
+serviceAccountKey.json
+.env
+node_modules

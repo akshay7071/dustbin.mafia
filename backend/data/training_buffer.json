@@ -1,0 +1,242 @@
+[
+  {
+    "area_type": 1,
+    "area_name": "Gulmandi Market",
+    "last_collected_hours": 12,
+    "time_of_day": 9,
+    "day_of_week": 0,
+    "fill_percentage": 78.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Mondha Market",
+    "last_collected_hours": 20,
+    "time_of_day": 10,
+    "day_of_week": 0,
+    "fill_percentage": 93.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Kranti Chowk",
+    "last_collected_hours": 14,
+    "time_of_day": 11,
+    "day_of_week": 1,
+    "fill_percentage": 85.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Juna Bazaar",
+    "last_collected_hours": 18,
+    "time_of_day": 8,
+    "day_of_week": 1,
+    "fill_percentage": 90.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Station Road",
+    "last_collected_hours": 16,
+    "time_of_day": 12,
+    "day_of_week": 2,
+    "fill_percentage": 82.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Osmanpura",
+    "last_collected_hours": 22,
+    "time_of_day": 14,
+    "day_of_week": 2,
+    "fill_percentage": 88.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Nirala Bazaar",
+    "last_collected_hours": 10,
+    "time_of_day": 9,
+    "day_of_week": 3,
+    "fill_percentage": 72.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Roshan Gate",
+    "last_collected_hours": 24,
+    "time_of_day": 15,
+    "day_of_week": 3,
+    "fill_percentage": 91.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Shahaganj",
+    "last_collected_hours": 8,
+    "time_of_day": 10,
+    "day_of_week": 4,
+    "fill_percentage": 65.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Gulmandi",
+    "last_collected_hours": 28,
+    "time_of_day": 16,
+    "day_of_week": 4,
+    "fill_percentage": 95.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Bajaj Nagar",
+    "last_collected_hours": 4,
+    "time_of_day": 7,
+    "day_of_week": 0,
+    "fill_percentage": 25.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Cidco N-1",
+    "last_collected_hours": 36,
+    "time_of_day": 8,
+    "day_of_week": 0,
+    "fill_percentage": 55.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Cidco N-2",
+    "last_collected_hours": 48,
+    "time_of_day": 9,
+    "day_of_week": 1,
+    "fill_percentage": 60.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Cidco N-3",
+    "last_collected_hours": 60,
+    "time_of_day": 10,
+    "day_of_week": 1,
+    "fill_percentage": 78.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Samarth Nagar",
+    "last_collected_hours": 6,
+    "time_of_day": 7,
+    "day_of_week": 2,
+    "fill_percentage": 20.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Shivaji Nagar",
+    "last_collected_hours": 55,
+    "time_of_day": 11,
+    "day_of_week": 2,
+    "fill_percentage": 70.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Garkheda",
+    "last_collected_hours": 40,
+    "time_of_day": 13,
+    "day_of_week": 3,
+    "fill_percentage": 58.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Mukundwadi",
+    "last_collected_hours": 30,
+    "time_of_day": 14,
+    "day_of_week": 3,
+    "fill_percentage": 45.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Naregaon",
+    "last_collected_hours": 64,
+    "time_of_day": 15,
+    "day_of_week": 4,
+    "fill_percentage": 80.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Aurangpura",
+    "last_collected_hours": 12,
+    "time_of_day": 8,
+    "day_of_week": 4,
+    "fill_percentage": 35.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Chikalthana MIDC",
+    "last_collected_hours": 60,
+    "time_of_day": 9,
+    "day_of_week": 0,
+    "fill_percentage": 55.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Shendra MIDC",
+    "last_collected_hours": 72,
+    "time_of_day": 10,
+    "day_of_week": 1,
+    "fill_percentage": 40.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Waluj MIDC",
+    "last_collected_hours": 39,
+    "time_of_day": 11,
+    "day_of_week": 2,
+    "fill_percentage": 25.0
+  },
+  {
+    "area_type": 0,
+    "area_name": "Daultabad Industrial",
+    "last_collected_hours": 70,
+    "time_of_day": 12,
+    "day_of_week": 3,
+    "fill_percentage": 50.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Gulmandi Market",
+    "last_collected_hours": 12,
+    "time_of_day": 17,
+    "day_of_week": 5,
+    "fill_percentage": 78.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Kranti Chowk",
+    "last_collected_hours": 8,
+    "time_of_day": 17,
+    "day_of_week": 5,
+    "fill_percentage": 55.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Mondha Market",
+    "last_collected_hours": 20,
+    "time_of_day": 17,
+    "day_of_week": 5,
+    "fill_percentage": 93.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Osmanpura",
+    "last_collected_hours": 5,
+    "time_of_day": 17,
+    "day_of_week": 5,
+    "fill_percentage": 25.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Nirala Bazaar",
+    "last_collected_hours": 15,
+    "time_of_day": 17,
+    "day_of_week": 5,
+    "fill_percentage": 78.0
+  },
+  {
+    "area_type": 1,
+    "area_name": "Gulmandi Market",
+    "last_collected_hours": 40,
+    "time_of_day": 17,
+    "day_of_week": 5,
+    "fill_percentage": 55.0
+  }
+]

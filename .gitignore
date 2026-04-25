@@ -1,7 +1,11 @@
-docs
+docs/
 node_modules/
 .env
 .env.*
 dist/
 build/
 *.log
+product_requirements.md
+.DS_Store
+.vscode/
+.idea/

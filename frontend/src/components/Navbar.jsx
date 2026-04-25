@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Trash2, LogOut, LayoutDashboard, BarChart3, Globe,
-  Shield, Truck, ArrowLeftRight, Command
+  Shield, Truck, ArrowLeftRight, Command, Zap, History
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BackForwardControls from './BackForwardControls';
@@ -63,6 +63,8 @@ export default function Navbar() {
                 {isAdmin && (
                   <>
                     <NavLink to={`${portalPrefix}/analytics`} icon={<BarChart3 className="w-3.5 h-3.5" />} label="Analytics" current={location.pathname} />
+                    <NavLink to={`${portalPrefix}/retrain`} icon={<Zap className="w-3.5 h-3.5" />} label="Evolution" current={location.pathname} />
+                    <NavLink to={`${portalPrefix}/logs`} icon={<History className="w-3.5 h-3.5" />} label="Logs" current={location.pathname} />
                     <NavLink to={`${portalPrefix}/public`} icon={<Globe className="w-3.5 h-3.5" />} label="Public" current={location.pathname} />
                   </>
                 )}

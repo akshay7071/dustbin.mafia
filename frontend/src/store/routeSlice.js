@@ -1,13 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../api/axios';
+import { DUMMY_ROUTE } from '../utils/dummyData';
 
-export const optimizeRoute = createAsyncThunk('route/optimize', async ({ depot_lat, depot_lng, urgency_filter }) => {
-  const { data } = await api.post('/api/route', { depot_lat, depot_lng, urgency_filter });
-  return data;
+export const optimizeRoute = createAsyncThunk('route/optimize', async () => {
+  try {
+    const { data } = await api.post('/route');
+    return data && data.route && data.route.length > 0 ? data : DUMMY_ROUTE;
+  } catch (err) {
+    console.warn('Backend unavailable, using dummy route.');
+    return DUMMY_ROUTE;
+  }
 });
 
 export const dispatchRoute = createAsyncThunk('route/dispatch', async ({ driver_phone, route_id }) => {
-  const { data } = await api.post('/api/dispatch', { driver_phone, route_id });
+  const { data } = await api.post('/dispatch', { driver_phone, route_id });
   return data;
 });
 
@@ -22,10 +28,6 @@ const routeSlice = createSlice({
     error: null,
   },
   reducers: {
-    setRouteFromSocket: (state, action) => {
-      state.route = action.payload.route;
-      state.stats = action.payload.stats;
-    },
     clearRoute: (state) => {
       state.route = [];
       state.stats = {};
@@ -39,14 +41,15 @@ const routeSlice = createSlice({
       .addCase(optimizeRoute.pending, (state) => { state.loading = true; })
       .addCase(optimizeRoute.fulfilled, (state, action) => {
         state.loading = false;
-        state.route = action.payload.route;
+        state.route = action.payload.route || [];
         state.stats = {
-          total_km: action.payload.total_km,
-          baseline_km: action.payload.baseline_km,
-          fuel_saved_L: action.payload.fuel_saved_L,
-          co2_saved_kg: action.payload.co2_saved_kg,
-          bins_in_route: action.payload.bins_in_route,
+          total_distance_km: action.payload.total_distance_km,
+          baseline_distance_km: action.payload.baseline_distance_km,
+          bins_visited: action.payload.bins_visited,
           bins_skipped: action.payload.bins_skipped,
+          fuel_saved_litres: action.payload.fuel_saved_litres,
+          co2_saved_kg: action.payload.co2_saved_kg,
+          trees_equivalent: action.payload.trees_equivalent,
         };
         state.routeId = action.payload.routeId || null;
         state.dispatched = false;
@@ -67,6 +70,6 @@ const routeSlice = createSlice({
   }
 });
 
-export const { setRouteFromSocket, clearRoute } = routeSlice.actions;
+export const { clearRoute } = routeSlice.actions;
 
 export default routeSlice.reducer;

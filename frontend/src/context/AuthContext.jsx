@@ -30,14 +30,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Mocking login for development if backend is not ready
-      // const response = await api.post('/api/auth/login', { email, password });
-      // const newToken = response.data.token;
-      
-      const newToken = "mock_jwt_token_for_demo";
+      const response = await api.post('/auth/login', { email, password });
+      const newToken = response.data.token;
       localStorage.setItem('swt_token', newToken);
       setToken(newToken);
-      setUser({ email, role: 'admin' });
+      setUser(response.data.user || { email, role: 'admin' });
       return true;
     } catch (error) {
       console.error("Login failed:", error);

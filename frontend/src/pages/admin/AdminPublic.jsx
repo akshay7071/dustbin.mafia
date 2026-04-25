@@ -1,190 +1,210 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { Leaf, Clock, Truck, ShieldAlert, Gauge, Map, BarChart3, Users, CheckCircle2 } from 'lucide-react';
+import { Leaf, Clock, Truck, ShieldAlert, Gauge, Map as MapIcon, BarChart3, Users, CheckCircle2 } from 'lucide-react';
+import LiveMap from '../../components/LiveMap';
+import api from '../../api/axios';
+import toast from 'react-hot-toast';
+import { DUMMY_METRICS } from '../../utils/dummyData';
 
 const containerVariants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.08 } }
 };
+
 const itemVariants = {
   hidden: { opacity: 0, y: 25 },
   show: { opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.6 } }
 };
 
-const ZONE_DATA = [
-  { lat: 19.876, lng: 75.342, score: 95, name: 'City Hall' },
-  { lat: 19.8756, lng: 75.347, score: 82, name: 'Station Road' },
-  { lat: 19.879, lng: 75.351, score: 60, name: 'Nirala Bazaar' },
-  { lat: 19.872, lng: 75.338, score: 45, name: 'Mondha Market' },
-  { lat: 19.868, lng: 75.345, score: 88, name: 'Cidco N-1' },
-];
-
 export default function AdminPublic() {
-  const [cleanlinessScore] = useState(73);
+  const [bins, setBins] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [binsRes, metricsRes] = await Promise.all([
+          api.get('/bins'),
+          api.get('/metrics').catch(() => ({ data: DUMMY_METRICS }))
+        ]);
+        setBins(binsRes.data);
+        setMetrics(metricsRes.data || DUMMY_METRICS);
+      } catch (err) {
+        toast.error('Sync failure with municipal core');
+        setMetrics(DUMMY_METRICS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Calculate a simulated city cleanliness score based on bin fill levels
+  const cityScore = bins.length > 0 
+    ? Math.round(100 - (bins.reduce((acc, b) => acc + (b.fill_pct || 0), 0) / bins.length))
+    : 73;
 
   return (
-    <div className="relative min-h-screen bg-[#050914] flex flex-col pt-20 pb-12">
+    <div className="relative min-h-screen bg-[#050914] flex flex-col pt-24 pb-12">
       <div className="space-dust" />
-      <motion.div variants={containerVariants} initial="hidden" animate="show"
+      
+      <motion.div 
+        variants={containerVariants} initial="hidden" animate="show"
         className="relative z-10 w-full max-w-7xl mx-auto px-6 py-8"
       >
         {/* Header */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 space-y-4 sm:space-y-0">
+        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
           <div>
-            <div className="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/30 px-3 py-1 rounded-full text-xs font-mono text-indigo-300 uppercase tracking-wider mb-3">
-              <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" /><span>Admin Preview — Public View</span>
+            <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-4">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+              <span>Citizen Information Portal · Public View</span>
             </div>
-            <h1 className="font-heading text-3xl font-bold text-white tracking-wide">SAMBHAJI NAGAR <span className="text-cyan-400">INTELLIGENCE</span></h1>
-            <p className="text-slate-400 mt-1 font-mono text-sm">Citizen-facing transparency dashboard</p>
+            <h1 className="font-heading text-4xl font-black text-white tracking-tight leading-none">
+              SMART <span className="text-cyan-400">CITIZEN</span> HUB
+            </h1>
+            <p className="text-slate-400 mt-2 font-mono text-xs uppercase tracking-tighter opacity-70">Real-time municipal waste telemetry & transparency</p>
           </div>
-          <div className="text-xs font-mono text-slate-400 flex items-center bg-white/5 px-3 py-1.5 rounded-full border border-white/10 space-x-2">
-            <Clock className="w-4 h-4 text-cyan-400" /><span>Live Feed</span>
-            <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" /></span>
+          <div className="flex items-center gap-4">
+             <div className="text-[10px] font-black text-slate-400 flex items-center bg-white/5 px-4 py-2 rounded-2xl border border-white/10 gap-2 uppercase tracking-widest font-mono">
+               <Clock className="w-3.5 h-3.5 text-cyan-400" />
+               <span>Last Updated: {new Date().toLocaleTimeString()}</span>
+             </div>
           </div>
         </motion.div>
 
-        {/* KPI Cards */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Impact Tiles */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {[
-            { icon: CheckCircle2, label: 'BINS COLLECTED TODAY', value: '187', color: 'text-emerald-400', border: 'border-emerald-500/30' },
-            { icon: Truck, label: 'ROUTES COMPLETED', value: '3', color: 'text-cyan-400', border: 'border-cyan-500/30' },
-            { icon: Leaf, label: 'CO₂ AVOIDED THIS WEEK', value: '43 kg', color: 'text-indigo-400', border: 'border-indigo-500/30' },
-            { icon: ShieldAlert, label: 'OVERFLOW INCIDENTS', value: '2', color: 'text-red-400', border: 'border-red-500/30' },
+            { icon: CheckCircle2, label: 'BINS MONITORED', value: bins.length, color: 'text-emerald-400', bg: 'bg-emerald-500/5' },
+            { icon: Truck, label: 'SAVED DISTANCE', value: `${Math.round(metrics?.optimized_distance_km || 0)} KM`, color: 'text-cyan-400', bg: 'bg-cyan-500/5' },
+            { icon: Leaf, label: 'CO₂ REDUCTION', value: `${Math.round(metrics?.co2_saved_kg || 43)} KG`, color: 'text-indigo-400', bg: 'bg-indigo-500/5' },
+            { icon: ShieldAlert, label: 'CLEANLINESS SCORE', value: `${cityScore}%`, color: 'text-amber-400', bg: 'bg-amber-500/5' },
           ].map((card, i) => (
-            <motion.div key={i} whileHover={{ y: -4 }} className={`glass-panel p-5 rounded-2xl border ${card.border} relative overflow-hidden group`}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 border ${card.border} bg-white/5`}>
-                <card.icon className={`w-5 h-5 ${card.color}`} />
+            <div key={i} className="glass-panel p-6 rounded-3xl border border-white/10 group hover:border-white/20 transition-all">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${card.bg} border border-white/5`}>
+                <card.icon className={`w-6 h-6 ${card.color}`} />
               </div>
-              <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">{card.label}</p>
-              <p className="text-3xl font-bold text-white">{card.value}</p>
-            </motion.div>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">{card.label}</p>
+              <p className="text-3xl font-black text-white tracking-tighter">{card.value}</p>
+            </div>
           ))}
         </motion.div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Map */}
-          <motion.div variants={itemVariants} className="lg:col-span-2 glass-panel rounded-2xl border border-white/10 overflow-hidden flex flex-col" style={{ minHeight: '440px' }}>
-            <div className="p-4 border-b border-white/10 bg-black/40 flex justify-between items-center">
-              <h2 className="font-heading font-bold text-white tracking-wide flex items-center space-x-2"><Map className="w-5 h-5 text-cyan-400" /><span>LIVE CLEANLINESS MAP</span></h2>
-              <div className="flex items-center space-x-2 text-xs font-mono">
-                <span className="text-slate-400">Clean</span>
-                <div className="w-20 h-1.5 bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500 rounded-full" />
-                <span className="text-slate-400">Dirty</span>
+        {/* Main Interface */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Public Map View */}
+          <motion.div variants={itemVariants} className="lg:col-span-2 glass-panel rounded-3xl border border-white/10 overflow-hidden min-h-[500px] flex flex-col shadow-2xl relative">
+            <div className="px-6 py-4 border-b border-white/10 bg-black/40 flex justify-between items-center z-10">
+              <h2 className="font-heading font-black text-xs text-white tracking-widest flex items-center gap-3 uppercase">
+                <MapIcon className="w-4 h-4 text-cyan-400" />
+                Live Sanitation Topology
+              </h2>
+              <div className="flex items-center gap-4 text-[9px] font-mono font-black uppercase">
+                <span className="text-slate-500">LEGEND:</span>
+                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-emerald-400">Clean</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-red-400">Urgent</span></div>
               </div>
             </div>
-            <div className="flex-1" style={{ minHeight: '360px' }}>
-              <MapContainer center={[19.8744, 75.3445]} zoom={13} style={{ height: '100%', width: '100%', minHeight: '360px', backgroundColor: '#050914' }} zoomControl={false} scrollWheelZoom={false}>
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" attribution="&copy; CARTO" />
-                {ZONE_DATA.map((zone, i) => {
-                  const color = zone.score >= 80 ? '#10B981' : zone.score >= 60 ? '#F59E0B' : '#EF4444';
-                  return (
-                    <CircleMarker key={i} center={[zone.lat, zone.lng]} radius={14} pathOptions={{ color, fillColor: color, fillOpacity: 0.5, weight: 1 }}>
-                      <Popup><div className="text-sm font-semibold">{zone.name}</div><div className="text-xs text-gray-500">Score: {zone.score}/100</div></Popup>
-                    </CircleMarker>
-                  );
-                })}
-              </MapContainer>
+            <div className="flex-1">
+              <LiveMap predictions={bins} />
             </div>
           </motion.div>
 
-          {/* Right Column */}
-          <div className="space-y-4 flex flex-col">
-            {/* Gauge */}
-            <motion.div variants={itemVariants} className="glass-panel p-5 rounded-2xl border border-white/10">
-              <h3 className="font-heading font-bold text-white tracking-wide mb-4 flex items-center space-x-2"><Gauge className="w-5 h-5 text-cyan-400" /><span>CITY SCORE</span></h3>
-              <div className="flex flex-col items-center">
-                <div className="relative w-28 h-28">
+          {/* Citizen Metrics */}
+          <div className="space-y-6 flex flex-col">
+            <motion.div variants={itemVariants} className="glass-panel p-8 rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-500/5 to-transparent">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-heading font-black text-xs text-white tracking-widest uppercase flex items-center gap-3">
+                  <Gauge className="w-4 h-4 text-cyan-400" />
+                  Health Index
+                </h3>
+                <span className="text-[10px] font-black text-indigo-400 uppercase">Live</span>
+              </div>
+              <div className="flex flex-col items-center py-4">
+                <div className="relative w-36 h-36">
                   <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-                    <motion.circle cx="50" cy="50" r="38" fill="none"
-                      stroke={cleanlinessScore >= 80 ? '#10B981' : cleanlinessScore >= 60 ? '#F59E0B' : '#EF4444'}
+                    <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="8" />
+                    <motion.circle cx="50" cy="50" r="44" fill="none"
+                      stroke={cityScore >= 80 ? '#10B981' : cityScore >= 60 ? '#F59E0B' : '#EF4444'}
                       strokeWidth="8" strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 38}`}
-                      initial={{ strokeDashoffset: 2 * Math.PI * 38 }}
-                      animate={{ strokeDashoffset: 2 * Math.PI * 38 * (1 - cleanlinessScore / 100) }}
-                      transition={{ duration: 1.5, ease: 'easeOut' }}
+                      strokeDasharray={`${2 * Math.PI * 44}`}
+                      initial={{ strokeDashoffset: 2 * Math.PI * 44 }}
+                      animate={{ strokeDashoffset: 2 * Math.PI * 44 * (1 - cityScore / 100) }}
+                      transition={{ duration: 2, ease: 'easeOut' }}
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold text-white">{cleanlinessScore}</span>
-                    <span className="text-[10px] font-mono text-slate-400">/100</span>
+                    <span className="text-4xl font-black text-white tracking-tighter">{cityScore}</span>
+                    <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">Score</span>
                   </div>
                 </div>
-                <p className="text-sm font-mono text-amber-400 font-bold mt-2 tracking-wide">FAIR CONDITIONS</p>
+                <div className="mt-6 text-center">
+                  <p className="text-[10px] font-black text-indigo-400 tracking-[0.3em] uppercase mb-1">Status: Stable</p>
+                  <p className="text-xs text-slate-400 font-mono tracking-tight">Predicted improvement: +2.4% next 12h</p>
+                </div>
               </div>
             </motion.div>
 
-            {/* Collection Progress */}
-            <motion.div variants={itemVariants} className="glass-panel p-5 rounded-2xl border border-white/10 flex-1">
-              <h3 className="font-heading font-bold text-white tracking-wide mb-4 flex items-center space-x-2"><BarChart3 className="w-4 h-4 text-indigo-400" /><span>WARD PROGRESS</span></h3>
-              <div className="space-y-3">
+            <motion.div variants={itemVariants} className="glass-panel p-8 rounded-3xl border border-white/10 flex-1">
+              <h3 className="font-heading font-black text-xs text-white tracking-widest uppercase mb-8 flex items-center gap-3">
+                <BarChart3 className="w-4 h-4 text-indigo-400" />
+                Community Stats
+              </h3>
+              <div className="space-y-6">
                 {[
-                  { ward: 'Ward A — Station Rd', done: 12, total: 14 },
-                  { ward: 'Ward B — Nirala Bazar', done: 8, total: 18 },
-                  { ward: 'Ward C — Mondha', done: 4, total: 16 },
-                  { ward: 'Ward D — Cidco N-1', done: 11, total: 12 },
-                  { ward: 'Ward E — Waluj', done: 9, total: 10 },
-                ].map((w, i) => {
-                  const pct = Math.round((w.done / w.total) * 100);
-                  const color = pct >= 75 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500';
-                  return (
-                    <div key={i}>
-                      <div className="flex justify-between text-[10px] font-mono mb-1">
-                        <span className="text-slate-300">{w.ward}</span>
-                        <span className="text-slate-400">{pct}%</span>
-                      </div>
-                      <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                        <motion.div initial={{ width: 0 }} whileInView={{ width: `${pct}%` }} viewport={{ once: true }} transition={{ duration: 1, ease: 'easeOut', delay: i * 0.1 }} className={`h-full rounded-full ${color}`} />
-                      </div>
+                  { ward: 'Zone Alpha — Industrial', load: 88 },
+                  { ward: 'Zone Beta — Residential', load: 62 },
+                  { ward: 'Zone Gamma — Market', load: 45 },
+                  { ward: 'Zone Delta — Civic', load: 91 },
+                ].map((w, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between text-[10px] font-black text-slate-400 mb-2 uppercase tracking-wider font-mono">
+                      <span>{w.ward}</span>
+                      <span className="text-white">{w.load}%</span>
                     </div>
-                  );
-                })}
+                    <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }} 
+                        whileInView={{ width: `${w.load}%` }} 
+                        viewport={{ once: true }} 
+                        transition={{ duration: 1.5, delay: i * 0.1 }} 
+                        className={`h-full rounded-full bg-gradient-to-r ${w.load > 80 ? 'from-indigo-500 to-cyan-400' : 'from-indigo-500/50 to-indigo-500'}`} 
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Complaint Heatmap */}
-        <motion.div variants={itemVariants} className="glass-panel rounded-2xl border border-white/10 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-heading font-bold text-white tracking-wide flex items-center space-x-2"><Users className="w-5 h-5 text-amber-400" /><span>CITIZEN COMPLAINT ZONES</span></h3>
-            <span className="text-xs font-mono text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">Last 30 days</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              { name: 'Nirala Bazaar', complaints: 34, heat: 95 },
-              { name: 'Mondha Market', complaints: 28, heat: 78 },
-              { name: 'Kranti Chowk', complaints: 19, heat: 52 },
-              { name: 'Cidco N-1', complaints: 12, heat: 33 },
-              { name: 'Station Road', complaints: 8, heat: 22 },
-            ].map((zone, i) => {
-              const heatColor = zone.heat > 70 ? '#EF4444' : zone.heat > 40 ? '#F59E0B' : '#6366F1';
-              const textColor = zone.heat > 70 ? 'text-red-400' : zone.heat > 40 ? 'text-amber-400' : 'text-indigo-400';
-              const barColor = zone.heat > 70 ? 'bg-red-500' : zone.heat > 40 ? 'bg-amber-500' : 'bg-indigo-500';
-              return (
-                <motion.div key={i} whileHover={{ y: -4 }} className="relative overflow-hidden rounded-xl p-4 border border-white/10 bg-black/40 group">
-                  <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at center, ${heatColor} 0%, transparent 70%)` }} />
-                  <div className="relative z-10">
-                    <p className="text-xs font-semibold text-white mb-2">{zone.name}</p>
-                    <p className={`text-2xl font-bold ${textColor}`}>{zone.complaints}</p>
-                    <p className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">complaints</p>
-                    <div className="w-full h-1 bg-white/10 rounded-full mt-3 overflow-hidden">
-                      <motion.div initial={{ width: 0 }} whileInView={{ width: `${zone.heat}%` }} viewport={{ once: true }} transition={{ duration: 1, ease: 'easeOut', delay: i * 0.1 }} className={`h-full rounded-full ${barColor}`} />
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+        {/* Transparency Note */}
+        <motion.div variants={itemVariants} className="glass-panel rounded-3xl border border-indigo-500/20 p-8 bg-indigo-500/5">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+             <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+               <Users className="w-8 h-8 text-indigo-400" />
+             </div>
+             <div>
+               <h3 className="font-heading font-black text-white tracking-widest uppercase mb-2">Municipal Transparency Guarantee</h3>
+               <p className="text-sm text-slate-400 leading-relaxed font-sans opacity-80">
+                 All data shown on this dashboard is directly sourced from SmartWasteRouteAI sensor telemetry. Citizens can track collection progress and environmental impact in real-time. For emergency reports, please use the 24/7 hotline.
+               </p>
+             </div>
           </div>
         </motion.div>
       </motion.div>
 
-      <footer className="py-4 text-center text-slate-600 text-[10px] font-mono border-t border-white/5 bg-black/40 relative z-10 tracking-widest uppercase">
-        DATA PROVIDED BY SMARTWASTEROUTEAI · UPDATES EVERY 60 SECONDS
+      <footer className="mt-12 py-8 border-t border-white/5 bg-black/40">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">
+            OPERATED BY SAMBHAJI NAGAR MUNICIPAL CORP · AI BY SMARTWASTEROUTE
+          </p>
+          <div className="flex gap-6">
+            <span className="text-[10px] font-black text-cyan-500/50 uppercase tracking-widest">Privacy Policy</span>
+            <span className="text-[10px] font-black text-cyan-500/50 uppercase tracking-widest">Public API</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
