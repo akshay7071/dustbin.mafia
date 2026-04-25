@@ -1,0 +1,146 @@
+[
+  {
+    "timestamp": "2026-04-24T09:00:00",
+    "bin_id": "BIN_S01",
+    "area_name": "Gulmandi Market",
+    "predicted_fill": 55.0,
+    "actual_color": "orange",
+    "actual_fill": 78.0,
+    "error": 23.0
+  },
+  {
+    "timestamp": "2026-04-24T09:10:00",
+    "bin_id": "BIN_S02",
+    "area_name": "Mondha Market",
+    "predicted_fill": 60.0,
+    "actual_color": "red",
+    "actual_fill": 93.0,
+    "error": 33.0
+  },
+  {
+    "timestamp": "2026-04-24T09:20:00",
+    "bin_id": "BIN_S03",
+    "area_name": "Kranti Chowk",
+    "predicted_fill": 70.0,
+    "actual_color": "orange",
+    "actual_fill": 85.0,
+    "error": 15.0
+  },
+  {
+    "timestamp": "2026-04-24T09:30:00",
+    "bin_id": "BIN_S04",
+    "area_name": "Bajaj Nagar",
+    "predicted_fill": 40.0,
+    "actual_color": "green",
+    "actual_fill": 25.0,
+    "error": 15.0
+  },
+  {
+    "timestamp": "2026-04-24T09:40:00",
+    "bin_id": "BIN_S05",
+    "area_name": "Cidco N-3",
+    "predicted_fill": 50.0,
+    "actual_color": "orange",
+    "actual_fill": 78.0,
+    "error": 28.0
+  },
+  {
+    "timestamp": "2026-04-24T10:00:00",
+    "bin_id": "BIN_S06",
+    "area_name": "Osmanpura",
+    "predicted_fill": 65.0,
+    "actual_color": "orange",
+    "actual_fill": 78.0,
+    "error": 13.0
+  },
+  {
+    "timestamp": "2026-04-24T10:10:00",
+    "bin_id": "BIN_S07",
+    "area_name": "Chikalthana MIDC",
+    "predicted_fill": 70.0,
+    "actual_color": "yellow",
+    "actual_fill": 55.0,
+    "error": 15.0
+  },
+  {
+    "timestamp": "2026-04-24T10:20:00",
+    "bin_id": "BIN_S08",
+    "area_name": "Naregaon",
+    "predicted_fill": 55.0,
+    "actual_color": "orange",
+    "actual_fill": 78.0,
+    "error": 23.0
+  },
+  {
+    "timestamp": "2026-04-24T10:30:00",
+    "bin_id": "BIN_S09",
+    "area_name": "Nirala Bazaar",
+    "predicted_fill": 60.0,
+    "actual_color": "yellow",
+    "actual_fill": 55.0,
+    "error": 5.0
+  },
+  {
+    "timestamp": "2026-04-24T10:40:00",
+    "bin_id": "BIN_S10",
+    "area_name": "Roshan Gate",
+    "predicted_fill": 72.0,
+    "actual_color": "red",
+    "actual_fill": 93.0,
+    "error": 21.0
+  },
+  {
+    "timestamp": "2026-04-25T17:10:00.179116",
+    "bin_id": "BIN_001",
+    "area_name": "Gulmandi Market",
+    "predicted_fill": 72.5,
+    "actual_color": "orange",
+    "actual_fill": 78.0,
+    "error": 5.5
+  },
+  {
+    "timestamp": "2026-04-25T17:10:49.936039",
+    "bin_id": "BIN_002",
+    "area_name": "Kranti Chowk",
+    "predicted_fill": 60.0,
+    "actual_color": "yellow",
+    "actual_fill": 55.0,
+    "error": 5.0
+  },
+  {
+    "timestamp": "2026-04-25T17:10:55.301332",
+    "bin_id": "BIN_003",
+    "area_name": "Mondha Market",
+    "predicted_fill": 85.0,
+    "actual_color": "red",
+    "actual_fill": 93.0,
+    "error": 8.0
+  },
+  {
+    "timestamp": "2026-04-25T17:10:58.128830",
+    "bin_id": "BIN_004",
+    "area_name": "Osmanpura",
+    "predicted_fill": 40.0,
+    "actual_color": "green",
+    "actual_fill": 25.0,
+    "error": 15.0
+  },
+  {
+    "timestamp": "2026-04-25T17:11:03.446109",
+    "bin_id": "BIN_005",
+    "area_name": "Nirala Bazaar",
+    "predicted_fill": 70.0,
+    "actual_color": "orange",
+    "actual_fill": 78.0,
+    "error": 8.0
+  },
+  {
+    "timestamp": "2026-04-25T17:22:41.983887",
+    "bin_id": "T9EbOHWVUGPG3PsVue4Z",
+    "area_name": "Gulmandi Market",
+    "predicted_fill": 65.0,
+    "actual_color": "yellow",
+    "actual_fill": 55.0,
+    "error": 10.0
+  }
+]
