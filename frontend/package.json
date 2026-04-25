@@ -12,10 +12,13 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
     "@tailwindcss/vite": "^4.2.4",
+    "@tensorflow/tfjs": "^4.22.0",
     "axios": "^1.15.2",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "firebase": "^12.12.1",
+    "framer-motion": "^12.38.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.11.0",
     "react": "^19.2.5",
@@ -25,9 +28,11 @@
     "react-leaflet": "^5.0.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.14.2",
+    "recharts": "^3.8.1",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
+    "twilio": "^6.0.0",
     "vite-plugin-pwa": "^1.2.0"
   },
   "devDependencies": {

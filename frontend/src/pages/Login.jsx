@@ -1,89 +1,155 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, Loader2 } from 'lucide-react';
+import { Shield, Truck, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeRole, setActiveRole] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e, role) => {
     e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+
     if (!email || !password) {
       toast.error('Please enter both email and password');
       return;
     }
-    
+
     setIsLoading(true);
+    setActiveRole(role);
     try {
       await login(email, password);
-      toast.success('Logged in successfully');
-      navigate('/dashboard');
+      toast.success(`${role} logged in successfully`);
+      if (role === 'Admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/collector/dashboard');
+      }
     } catch (error) {
       toast.error('Invalid credentials');
+      setActiveRole(null);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#064E3B] to-[#F9FAFB] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 relative overflow-hidden">
-        {/* Decorative element */}
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-accent/10 rounded-full blur-2xl"></div>
+    <div className="min-h-screen bg-[#050914] flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="space-dust"></div>
+      
+      <div className="absolute top-12 left-1/2 -translate-x-1/2 text-center z-10">
+        <h1 className="font-heading font-extrabold text-4xl tracking-wider text-white">
+          SMART<span className="text-cyan-400">WASTE</span><span className="text-indigo-400">ROUTE</span>AI
+        </h1>
+        <p className="font-mono text-slate-400 text-sm mt-2 tracking-widest uppercase">System Authentication</p>
+      </div>
+
+      <div className="flex flex-col md:flex-row items-stretch justify-center gap-8 w-full max-w-5xl z-10 mt-16">
         
-        <div className="relative z-10 text-center mb-8">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Trash2 className="w-8 h-8 text-primary" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900">Municipal Operator Portal</h2>
-          <p className="text-gray-500 text-sm mt-2">Sign in to manage waste routes and dispatch drivers</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
-              placeholder="operator@smartwaste.local"
-            />
-          </div>
+        {/* Admin Card */}
+        <motion.div 
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          whileHover={{ y: -10, transition: { duration: 0.3 } }}
+          className="flex-1 glass-panel p-8 rounded-3xl border border-indigo-500/30 relative overflow-hidden group"
+        >
+          <div className="absolute inset-0 bg-indigo-500/5 group-hover:bg-indigo-500/10 transition-colors"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
-              placeholder="••••••••"
-            />
+          <div className="relative z-10">
+            <div className="w-14 h-14 bg-indigo-500/20 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/30">
+              <Shield className="w-7 h-7 text-indigo-400" />
+            </div>
+            <h2 className="font-heading text-2xl font-bold text-white mb-2">Admin Portal</h2>
+            <p className="font-mono text-xs text-slate-400 mb-8 h-8">Full access to city-wide analytics, fleet management, and settings.</p>
+            
+            <form onSubmit={(e) => handleLogin(e, 'Admin')} className="space-y-4">
+              <div>
+                <input 
+                  name="email"
+                  type="email" 
+                  placeholder="admin@smartwaste.local"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-mono text-sm"
+                />
+              </div>
+              <div>
+                <input 
+                  name="password"
+                  type="password" 
+                  placeholder="••••••••"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-mono text-sm"
+                />
+              </div>
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center space-x-2 shadow-[0_0_20px_rgba(99,102,241,0.3)] disabled:opacity-50 mt-4"
+              >
+                {isLoading && activeRole === 'Admin' ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Authenticate</span>}
+              </button>
+            </form>
           </div>
+        </motion.div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center">
-              <input type="checkbox" className="rounded border-gray-300 text-primary focus:ring-primary mr-2" />
-              <span className="text-gray-600">Remember me</span>
-            </label>
-            <a href="#" className="text-primary hover:text-primary-hover font-medium">Forgot password?</a>
+        {/* Collector Card */}
+        <motion.div 
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.1 }}
+          whileHover={{ y: -10, transition: { duration: 0.3 } }}
+          className="flex-1 glass-panel p-8 rounded-3xl border border-emerald-500/30 relative overflow-hidden group"
+        >
+          <div className="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+          
+          <div className="relative z-10">
+            <div className="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-6 border border-emerald-500/30">
+              <Truck className="w-7 h-7 text-emerald-400" />
+            </div>
+            <h2 className="font-heading text-2xl font-bold text-white mb-2">Collector Portal</h2>
+            <p className="font-mono text-xs text-slate-400 mb-8 h-8">Restricted access to route generation and bin status only.</p>
+            
+            <form onSubmit={(e) => handleLogin(e, 'Collector')} className="space-y-4">
+              <div>
+                <input 
+                  name="email"
+                  type="email" 
+                  placeholder="driver@smartwaste.local"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all font-mono text-sm"
+                />
+              </div>
+              <div>
+                <input 
+                  name="password"
+                  type="password" 
+                  placeholder="••••••••"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all font-mono text-sm"
+                />
+              </div>
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center space-x-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 mt-4"
+              >
+                {isLoading && activeRole === 'Collector' ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Start Shift</span>}
+              </button>
+            </form>
           </div>
+        </motion.div>
 
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-70 disabled:transform-none flex items-center justify-center"
-          >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Secure Sign In'}
-          </button>
-        </form>
       </div>
     </div>
   );

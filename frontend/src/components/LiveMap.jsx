@@ -1,154 +1,91 @@
-import { useState, useEffect } from 'react'
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const LiveMap = () => {
-  const [vehicles, setVehicles] = useState([])
-  const [selectedVehicle, setSelectedVehicle] = useState(null)
+const URGENCY_COLOR = {
+  CRITICAL: "#EF4444", // Neon Red
+  HIGH:     "#F59E0B", // Amber
+  MEDIUM:   "#F59E0B", // Amber
+  LOW:      "#10B981"  // Emerald
+};
 
+const GLOW_STYLE = {
+  CRITICAL: { color: '#EF4444', fillColor: '#EF4444', fillOpacity: 0.9, weight: 2 },
+  HIGH: { color: '#F59E0B', fillColor: '#F59E0B', fillOpacity: 0.8, weight: 2 },
+  MEDIUM: { color: '#F59E0B', fillColor: '#F59E0B', fillOpacity: 0.6, weight: 1 },
+  LOW: { color: '#10B981', fillColor: '#10B981', fillOpacity: 0.5, weight: 1 }
+};
+
+// Component to handle heatmap overlay (simulated with canvas/plasma class)
+function HeatmapOverlay() {
+  const map = useMap();
   useEffect(() => {
-    // Initialize vehicles
-    const initialVehicles = [
-      { id: 1, name: 'Truck Alpha', lat: 40.7128, lng: -74.0060, status: 'active', fuel: 75, route: 'Downtown Loop' },
-      { id: 2, name: 'Truck Beta', lat: 40.7260, lng: -73.9897, status: 'active', fuel: 82, route: 'Industrial Route' },
-      { id: 3, name: 'Truck Gamma', lat: 40.7580, lng: -73.9855, status: 'maintenance', fuel: 45, route: 'Residential North' }
-    ]
-    setVehicles(initialVehicles)
-
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setVehicles(prev => prev.map(vehicle => ({
-        ...vehicle,
-        lat: vehicle.lat + (Math.random() - 0.5) * 0.001,
-        lng: vehicle.lng + (Math.random() - 0.5) * 0.001,
-        fuel: Math.max(0, vehicle.fuel - Math.random() * 0.5)
-      })))
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active': return 'bg-green-500'
-      case 'idle': return 'bg-yellow-500'
-      case 'maintenance': return 'bg-red-500'
-      default: return 'bg-gray-500'
-    }
-  }
-
-  const getFuelColor = (fuel) => {
-    if (fuel > 60) return 'text-green-500'
-    if (fuel > 30) return 'text-yellow-500'
-    return 'text-red-500'
-  }
-
-  return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-green-500/20 rounded-xl p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-semibold text-white">Live Fleet Tracking</h3>
-        <div className="flex items-center space-x-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-green-500 text-sm">Live</span>
-        </div>
-      </div>
-
-      {/* Map Simulation */}
-      <div className="bg-gray-700/30 rounded-lg p-8 mb-6 relative h-64">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-gray-500 text-center">
-            <div className="text-4xl mb-2">🗺️</div>
-            <div>Interactive Map View</div>
-            <div className="text-sm mt-2">Real-time vehicle positions</div>
-          </div>
-        </div>
-        
-        {/* Simulated vehicle positions */}
-        {vehicles.map(vehicle => (
-          <div
-            key={vehicle.id}
-            className="absolute w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse cursor-pointer"
-            style={{
-              top: `${20 + (vehicle.lat - 40.7) * 1000}%`,
-              left: `${20 + (vehicle.lng + 74) * 1000}%`
-            }}
-            onClick={() => setSelectedVehicle(vehicle)}
-          />
-        ))}
-      </div>
-
-      {/* Vehicle List */}
-      <div className="space-y-3">
-        <h4 className="text-white font-medium mb-3">Fleet Status</h4>
-        {vehicles.map(vehicle => (
-          <div
-            key={vehicle.id}
-            className={`bg-gray-700/30 rounded-lg p-4 hover:bg-gray-700/50 transition-all cursor-pointer ${
-              selectedVehicle?.id === vehicle.id ? 'ring-2 ring-green-500' : ''
-            }`}
-            onClick={() => setSelectedVehicle(vehicle)}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="bg-green-500/20 w-10 h-10 rounded-lg flex items-center justify-center text-green-500">
-                  🚛
-                </div>
-                <div>
-                  <div className="text-white font-medium">{vehicle.name}</div>
-                  <div className="text-gray-400 text-sm">{vehicle.route}</div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${getStatusColor(vehicle.status)}`}></div>
-                  <span className="text-gray-400 text-sm capitalize">{vehicle.status}</span>
-                </div>
-                <div className="text-right">
-                  <div className={`text-sm font-medium ${getFuelColor(vehicle.fuel)}`}>
-                    {vehicle.fuel.toFixed(1)}%
-                  </div>
-                  <div className="text-gray-500 text-xs">Fuel</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Selected Vehicle Details */}
-      {selectedVehicle && (
-        <div className="mt-6 bg-gray-700/30 rounded-lg p-4">
-          <h4 className="text-white font-medium mb-3">Vehicle Details</h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-400">Vehicle:</span>
-              <span className="text-white ml-2">{selectedVehicle.name}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Status:</span>
-              <span className="text-white ml-2 capitalize">{selectedVehicle.status}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Position:</span>
-              <span className="text-white ml-2">{selectedVehicle.lat.toFixed(4)}, {selectedVehicle.lng.toFixed(4)}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Fuel Level:</span>
-              <span className={`ml-2 font-medium ${getFuelColor(selectedVehicle.fuel)}`}>
-                {selectedVehicle.fuel.toFixed(1)}%
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-400">Current Route:</span>
-              <span className="text-white ml-2">{selectedVehicle.route}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Last Update:</span>
-              <span className="text-white ml-2">Just now</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+    map.getPane('overlayPane').classList.add('animate-plasma');
+    return () => {
+      map.getPane('overlayPane').classList.remove('animate-plasma');
+    };
+  }, [map]);
+  return null;
 }
 
-export default LiveMap
+export default function LiveMap({ predictions = [], route = [], showHeatmap = false }) {
+  const routeCoords = route.map(stop => [stop.lat, stop.lng]);
+
+  return (
+    <div className="relative flex-1 h-full w-full">
+      <MapContainer 
+        center={[19.8744, 75.3445]} 
+        zoom={13} 
+        style={{ height: '100%', width: '100%', zIndex: 0, backgroundColor: '#050914' }}
+        zoomControl={false}
+      >
+        <TileLayer 
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        />
+        
+        {showHeatmap && <HeatmapOverlay />}
+
+        {predictions.map(bin => {
+          const isCritical = bin.urgency === "CRITICAL";
+          return (
+            <CircleMarker
+              key={bin.bin_id}
+              center={[bin.lat, bin.lng]}
+              radius={isCritical ? 12 : bin.urgency === "HIGH" ? 9 : 6}
+              pathOptions={{
+                ...GLOW_STYLE[bin.urgency],
+                className: isCritical ? 'animate-pulse-red' : ''
+              }}
+            >
+              <Popup className="custom-popup border-0 bg-transparent">
+                <div className="glass-panel p-4 rounded-xl border border-white/10 text-white min-w-[220px] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                  <strong className="block font-heading text-lg text-cyan-400 mb-3">{bin.area}</strong>
+                  <div className="text-xs font-mono grid grid-cols-2 gap-x-4 gap-y-3">
+                    <span className="text-slate-400">BIN_ID:</span> <span className="text-white">{bin.bin_id}</span>
+                    <span className="text-slate-400">FILL:</span> <span className="text-white font-bold">{bin.predicted_fill}%</span>
+                    <span className="text-slate-400">URGENCY:</span> <span className="font-bold" style={{color: URGENCY_COLOR[bin.urgency]}}>{bin.urgency}</span>
+                    <span className="text-slate-400">STATUS:</span> <span className="text-emerald-400 capitalize">{bin.status || 'Active'}</span>
+                  </div>
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
+        
+        {routeCoords.length > 0 && (
+          <Polyline 
+            positions={routeCoords} 
+            pathOptions={{ 
+              color: "#06B6D4", // Neon Cyan
+              weight: 4, 
+              opacity: 0.9,
+              dashArray: "10 10",
+              className: 'route-polyline'
+            }} 
+          />
+        )}
+      </MapContainer>
+    </div>
+  );
+}
