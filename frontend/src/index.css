@@ -1,1 +1,43 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #064E3B;
+  --color-primary-hover: #065F46;
+  --color-accent: #EA580C;
+  --color-accent-hover: #C2410C;
+  --color-critical: #DC2626;
+  --color-high: #EA580C;
+  --color-medium: #D97706;
+  --color-low: #16A34A;
+  --font-sans: 'DM Sans', sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+* {
+  font-family: 'DM Sans', sans-serif;
+}
+
+body {
+  background-color: #F9FAFB;
+  color: #111827;
+}
+
+/* Leaflet map fix */
+.leaflet-container { 
+  height: 100%; 
+  width: 100%; 
+  z-index: 10;
+}
+
+/* Custom scrollbar for route panel */
+.route-panel::-webkit-scrollbar { width: 4px; }
+.route-panel::-webkit-scrollbar-track { background: #F3F4F6; }
+.route-panel::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+
+/* Urgency badge animations */
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-red { animation: pulse-red 2s ease-in-out infinite; }
